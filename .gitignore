@@ -1,0 +1,20 @@
+# Visual Studio & .NET build artifacts
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NuGet
+*.nupkg
+packages/
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+# Archives (Extracted folders 2.PE_Exam and GivenSolution_PRN232 are already in repo)
+*.zip
+*.rar
