@@ -1,3 +1,9 @@
+@* =========================================================================
+   STEP 1: KHAI BÁO MODEL NHẬN DỮ LIỆU CHI TIẾT TỪ ACTION ANALYZE
+   MẸO ĐI THI: Toàn bộ HTML bên dưới COPY từ file `givenHTML/Analyze.html` của đề!
+   ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
+   Thay `MemberDetailDTO` bằng tên class DTO chi tiết của đề mới.
+   ========================================================================= *@
 @model Q2.Controllers.MemberDetailDTO
 <html>
 <head>
@@ -5,6 +11,12 @@
 </head>
 <body>
     <div class="analyze-wrap">
+        @* =================================================================
+           STEP 2: HIỂN THỊ THÔNG TIN CƠ BẢN Ở KHUNG TRÊN (CARD)
+           ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
+           - Giữ nguyên các `id="span_..."` trong file `givenHTML/Analyze.html` của đề.
+           - Thay dữ liệu mẫu cứng bằng `@Model.ThuocTinh` tương ứng.
+           ================================================================= *@
         <div class="member-card">
             <h3>Member Profile Analysis</h3>
             <div class="card-item"><strong>Member ID:</strong> <span id="span_@Model.MemberID">@Model.MemberID</span></div>
@@ -15,6 +27,15 @@
 
         <h4 style="margin-bottom: 15px; border-bottom: 1px solid #cbd5e1; padding-bottom: 10px; width: 750px; color: #334155;">Attended Sessions Log</h4>
 
+        @* =================================================================
+           STEP 3: BẢNG DANH SÁCH CHI TIẾT BÊN DƯỚI + CÔNG THỨC PHÂN LOẠI
+           ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
+           - Trong `givenHTML/Analyze.html` luôn có 2 dòng `<tr>` mẫu tương ứng với 2 nhãn
+             phân loại (ví dụ: Đỏ = "High Premium Session", Xanh = "Standard Session").
+           - Xem công thức trong đề bài (ở đây: `DurationMinutes * 5000 >= 400000`)
+             để đặt vào điều kiện `@if (...)` chọn nhãn Đỏ hoặc nhãn Xanh!
+           - Thay các ID cứng trong `<td id="td_..._10">` thành `<td id="td_..._@s.BookingID">`.
+           ================================================================= *@
         <table class="sessions-table">
             <thead>
                 <tr>
@@ -27,12 +48,14 @@
             <tbody>
                 @foreach (var s in Model.Sessions)
                 {
+                    // Tính chi phí buổi tập theo công thức đề bài: Số phút * 5,000 VNĐ
                     var cost = s.DurationMinutes * 5000;
                     <tr>
                         <td id="td_trainer_@s.BookingID">@s.TrainerName</td>
                         <td id="td_time_@s.BookingID">@s.SessionTime.ToString("yyyy-MM-dd HH:mm")</td>
                         <td id="td_duration_@s.BookingID">@s.DurationMinutes mins</td>
                         <td id="td_tier_@s.BookingID">
+                            @* ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]: Sửa điều kiện if và chữ hiển thị theo đề mới *@
                             @if (cost >= 400000)
                             {
                                 <span class="badge-high" style="color: red; font-weight: bold;">High Premium Session</span>

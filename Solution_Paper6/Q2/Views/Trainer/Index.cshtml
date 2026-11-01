@@ -1,3 +1,11 @@
+@* =========================================================================
+   STEP 1: KHAI BÁO KIỂU DỮ LIỆU NHẬN TỪ CONTROLLER (@model) VÀ ĐỌC VIEWBAG
+   MẸO ĐI THI: Toàn bộ khung HTML bên dưới là COPY 100% từ file `givenHTML/Trainer.html`
+   của đề cho sẵn, sau đó chỉ thay phần dữ liệu cứng bằng vòng lặp `@foreach`!
+   ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
+   - Thay `TrainerSearchDTO` và `SpecializationDTO` bằng tên class DTO của đề mới.
+   - Đọc các biến `ViewBag` đã truyền từ Controller sang.
+   ========================================================================= *@
 @model List<Q2.Controllers.TrainerSearchDTO>
 @{
     var specs = ViewBag.Specs as List<Q2.Controllers.SpecializationDTO> ?? new List<Q2.Controllers.SpecializationDTO>();
@@ -12,10 +20,21 @@
     <div class="gym-wrap">
         <h2 style="margin-top: 0; margin-bottom: 20px;">Trainer Booking Directory</h2>
 
+        @* =================================================================
+           STEP 2: FORM TÌM KIẾM & LỌC (GIỮ NGUYÊN ID CỦA THẺ SELECT, INPUT, BUTTON!)
+           ⚠️ [CỰC KỲ QUAN TRỌNG KHI CHẤM TỰ ĐỘNG]:
+           Tool chấm bài (Selenium) sẽ tìm theo `id="sl_specializations"`, `id="op_0"`,
+           `id="op_@sp.SpecID"`, `id="ip_trainerName"`, `id="bt_search"`.
+           TUYỆT ĐỐI GIỮ ĐÚNG CÁC ID TRONG FILE givenHTML!
+           ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
+           - Sửa `action="/Trainer"` thành đường dẫn trang chính của đề mới.
+           - Thay phần `<option>` cứng trong givenHTML bằng vòng lặp `@foreach` bên dưới.
+           ================================================================= *@
         <form method="get" action="/Trainer" class="filter-section">
             <div class="filter-item">
                 <label>Specialization:</label>
                 <select name="specId" id="sl_specializations">
+                    @* Option mặc định value="0" ("All specializations") *@
                     @if (selectedSpecId == 0)
                     {
                         <option value="0" id="op_0" selected>All specializations</option>
@@ -24,6 +43,8 @@
                     {
                         <option value="0" id="op_0">All specializations</option>
                     }
+
+                    @* Vòng lặp in danh sách chuyên môn từ API *@
                     @foreach (var sp in specs)
                     {
                         if (selectedSpecId == sp.SpecID)
@@ -40,12 +61,22 @@
 
             <div class="filter-item">
                 <label>Trainer Name:</label>
+                @* Gắn value="@trainerName" để giữ lại chữ vừa gõ sau khi bấm Search *@
                 <input type="text" name="trainerName" id="ip_trainerName" value="@trainerName" placeholder="Enter trainer name...">
             </div>
 
             <button type="submit" id="bt_search" class="btn-submit">Search</button>
         </form>
 
+        @* =================================================================
+           STEP 3: BẢNG HIỂN THỊ DANH SÁCH KẾT QUẢ
+           ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
+           - Mở file `givenHTML` của đề mới, XÓA các thẻ `<tr>` dữ liệu mẫu cứng trong `<tbody>`,
+             chỉ giữ lại 1 thẻ `<tr>` đầu tiên làm mẫu rồi bọc `@foreach (var t in Model)` ra ngoài!
+           - Thay số ID cứng (ví dụ: `td_name_1`) thành ID động `td_name_@t.TrainerID`.
+           - Chú ý cột Specializations có vòng lặp con `@foreach (var sp in t.Specializations)`
+             với `id="span_@(sp.SpecName)_@sp.SpecID"` đúng theo mẫu trong givenHTML!
+           ================================================================= *@
         <table class="trainer-table">
             <thead>
                 <tr>
