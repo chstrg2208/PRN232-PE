@@ -113,20 +113,20 @@ Mở **Tools** -> **NuGet Package Manager** -> **Package Manager Console** (ch�
 dotnet ef dbcontext scaffold "Server=(localdb)\MSSQLLocalDB;Database=PRN232_PE_SU26_13;Trusted_Connection=True;TrustServerCertificate=True" Microsoft.EntityFrameworkCore.SqlServer -o Models --no-onconfiguring
 ```
 
-### Lệnh Đóng Gói (Publish) & Chuẩn Bị Nộp Bài:
+### Lệnh Đóng Gói (Publish) & Chuẩn Bị Nộp Bài (Dành riêng cho Trương Chí Trung - SE193059):
 Mở CMD hoặc Terminal tại thư mục từng câu (thư mục chứa file `.csproj` của Q1 hoặc Q2):
 ```bash
-# Publish Q1 (Ví dụ tên sinh viên là anhlb, MSSV là he170000 -> anhlbhe170000)
+# Publish Q1 (Tài khoản thi: trungtcse193059)
 cd Q1
-dotnet publish -c Release -o ./Q1_anhlbhe170000
+dotnet publish -c Release -o ./Q1_trungtcse193059
 
 # Publish Q2
 cd ../Q2
-dotnet publish -c Release -o ./Q2_anhlbhe170000
+dotnet publish -c Release -o ./Q2_trungtcse193059
 ```
 > **💡 Các bước giảm dung lượng trước khi nộp vào PEA_Client (Tránh lỗi file quá nặng):**
 > 1. Xóa thư mục `bin/` và `obj/` ở thư mục gốc của project Q1 và Q2.
-> 2. Vào bên trong thư mục vừa publish (`Q1_anhlbhe170000/` và `Q2_anhlbhe170000/`), **xóa thư mục `runtimes/`**.
+> 2. Vào bên trong thư mục vừa publish (`Q1_trungtcse193059/` và `Q2_trungtcse193059/`), **xóa thư mục `runtimes/`**.
 > 3. Nộp toàn bộ thư mục gốc của project vào phần mềm `PEA_Client` (nộp theo từng Question, có thể nộp nhiều lần, hệ thống giữ lần nộp cuối cùng).
 
 ---

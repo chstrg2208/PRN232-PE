@@ -100,26 +100,27 @@ app.Run();
 
 
 --------------------------------------------------------------------------------
-4. LỆNH PUBLISH VÀ NỘP BÀI (THEO ĐÚNG QUY CHẾ "LƯU Ý THI PE")
+4. LỆNH PUBLISH VÀ NỘP BÀI (DÀNH RIÊNG CHO: TRƯƠNG CHÍ TRUNG - SE193059)
 --------------------------------------------------------------------------------
 * Thao tác: Mở CMD hoặc Terminal tại thư mục của từng câu (thư mục chứa file .csproj)
-  Cú pháp: dotnet publish -c Release -o ./[QuestionNumber_TênMãSinhViên]
+  Cú pháp chuẩn: dotnet publish -c Release -o ./[QuestionNumber_TênMãSinhViên]
+  (Tài khoản thi của bạn: trungtcse193059)
 
-* Ví dụ sinh viên tên AnhLB mã HE170000:
+* LỆNH COPY CHẠY NGAY CHO BẠN:
 
 1) Publish câu Q1:
 cd Q1
-dotnet publish -c Release -o ./Q1_anhlbhe170000
+dotnet publish -c Release -o ./Q1_trungtcse193059
 cd ..
 
 2) Publish câu Q2:
 cd Q2
-dotnet publish -c Release -o ./Q2_anhlbhe170000
+dotnet publish -c Release -o ./Q2_trungtcse193059
 cd ..
 
 * CÁC BƯỚC GIẢM DUNG LƯỢNG TRÁNH LỖI FILE NẶNG TRƯỚC KHI NỘP VÀO PEA_CLIENT:
   Bước 1: Vào thư mục Q1 và Q2, XÓA thư mục "bin" và "obj".
-  Bước 2: Vào bên trong thư mục vừa publish (ví dụ Q1_anhlbhe170000 và Q2_anhlbhe170000), 
+  Bước 2: Vào bên trong thư mục vừa publish (Q1_trungtcse193059/ và Q2_trungtcse193059/), 
           XÓA thư mục "runtimes".
   Bước 3: Nộp toàn bộ thư mục gốc của project vào phần mềm PEA_Client (nộp từng câu riêng).
 
