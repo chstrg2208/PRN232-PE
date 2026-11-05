@@ -1,0 +1,148 @@
+================================================================================
+                    BẢNG LỆNH & CẤU HÌNH BẮT BUỘC - THI PE PRN232
+                 (Lưu file này trong máy thi, mở ra là copy dùng ngay)
+================================================================================
+
+--------------------------------------------------------------------------------
+1. CẤU HÌNH APPSETTINGS.JSON
+--------------------------------------------------------------------------------
+[Project Q1 - Web API] (appsettings.json):
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "MyCnn": "Server=localhost;Database=PRN232_PE_SU26_13;uid=sa;pwd=123;TrustServerCertificate=True;"
+  }
+}
+* Lưu ý: 
+- Nếu máy thi dùng LocalDB: "MyCnn": "Server=(localdb)\\MSSQLLocalDB;Database=PRN232_PE_SU26_13;Trusted_Connection=True;TrustServerCertificate=True;"
+- Đổi tên Database PRN232_PE_SU26_13 theo đúng file database.sql của đề thi.
+- KHÔNG tự ý đổi tên key "MyCnn". KHÔNG tự ý thêm các thẻ JSON lạ (Kestrel, Endpoints...).
+
+[Project Q2 - Web MVC] (appsettings.json):
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "GivenAPIBaseUrl": "http://localhost:5100"
+}
+* Lưu ý: Bắt buộc phải có "GivenAPIBaseUrl": "http://localhost:5100"
+
+
+--------------------------------------------------------------------------------
+2. LỆNH TỰ ĐỘNG TẠO THƯ MỤC MODELS (SCAFFOLD DATABASE) - MẤT 3 GIÂY
+--------------------------------------------------------------------------------
+* Thao tác: Mở Visual Studio -> Menu Tools -> NuGet Package Manager -> Package Manager Console
+  (Đảm bảo ô "Default project" ở góc trên khung console đang chọn là "Q1")
+
+* Lệnh chuẩn 1 (Đọc trực tiếp từ appsettings.json - KHUYÊN DÙNG, ĐỠ PHẢI GÕ TÊN DB):
+dotnet ef dbcontext scaffold "Name=ConnectionStrings:MyCnn" Microsoft.EntityFrameworkCore.SqlServer -o Models --project Q1 --force
+
+* Lệnh chuẩn 2 (Điền trực tiếp chuỗi kết nối):
+dotnet ef dbcontext scaffold "Server=localhost;Database=PRN232_PE_SU26_13;uid=sa;pwd=123;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -o Models --project Q1 --force
+
+(Nếu máy báo chưa cài dotnet-ef thì chạy lệnh này trước: dotnet tool install --global dotnet-ef)
+
+
+--------------------------------------------------------------------------------
+3. MẪU PROGRAM.CS CHUẨN ĐỂ COPY
+--------------------------------------------------------------------------------
+[Q1/Program.cs]:
+using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
+using Q1.Models;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Bắt buộc: Chống lỗi vòng lặp JSON khi trả về bảng có quan hệ
+builder.Services.AddControllers()
+    .AddJsonOptions(o => o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
+// Đăng ký DbContext (Thay Prn232PeSu2613Context bằng tên file *Context trong thư mục Models)
+builder.Services.AddDbContext<Prn232PeSu2613Context>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("MyCnn")));
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+app.UseSwagger();
+app.UseSwaggerUI();
+app.MapControllers();
+app.Run();
+
+
+[Q2/Program.cs]:
+var builder = WebApplication.CreateBuilder(args);
+
+// Bắt buộc: Đăng ký MVC Controllers + Views
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+app.UseStaticFiles();
+app.UseRouting();
+
+// Thay Member bằng tên Controller của đề (VD: Trainer, Doctor, Student...)
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Member}/{action=Index}/{id?}");
+
+app.Run();
+
+
+--------------------------------------------------------------------------------
+4. LỆNH PUBLISH VÀ NỘP BÀI (THEO ĐÚNG QUY CHẾ "LƯU Ý THI PE")
+--------------------------------------------------------------------------------
+* Thao tác: Mở CMD hoặc Terminal tại thư mục của từng câu (thư mục chứa file .csproj)
+  Cú pháp: dotnet publish -c Release -o ./[QuestionNumber_TênMãSinhViên]
+
+* Ví dụ sinh viên tên AnhLB mã HE170000:
+
+1) Publish câu Q1:
+cd Q1
+dotnet publish -c Release -o ./Q1_anhlbhe170000
+cd ..
+
+2) Publish câu Q2:
+cd Q2
+dotnet publish -c Release -o ./Q2_anhlbhe170000
+cd ..
+
+* CÁC BƯỚC GIẢM DUNG LƯỢNG TRÁNH LỖI FILE NẶNG TRƯỚC KHI NỘP VÀO PEA_CLIENT:
+  Bước 1: Vào thư mục Q1 và Q2, XÓA thư mục "bin" và "obj".
+  Bước 2: Vào bên trong thư mục vừa publish (ví dụ Q1_anhlbhe170000 và Q2_anhlbhe170000), 
+          XÓA thư mục "runtimes".
+  Bước 3: Nộp toàn bộ thư mục gốc của project vào phần mềm PEA_Client (nộp từng câu riêng).
+
+
+--------------------------------------------------------------------------------
+5. LỆNH XÓA SẠCH LỖI CACHE ẢO CỦA VISUAL STUDIO NẾU BỊ BÁO ĐỎ HÀNG TRĂM LỖI
+--------------------------------------------------------------------------------
+Nếu mở Solution lên bị báo hàng trăm lỗi đỏ (CS0234, CS0518, System.Object not found):
+- Tắt Visual Studio.
+- Mở PowerShell tại thư mục chứa file .sln chạy 3 lệnh sau:
+  Get-ChildItem -Force -Recurse -Filter ".vs" | Remove-Item -Force -Recurse
+  Get-ChildItem -Force -Recurse -Include "bin","obj" | Remove-Item -Force -Recurse
+  dotnet build
+- Mở lại Solution bằng Visual Studio -> Hết sạch 100% lỗi đỏ!
+
+
+--------------------------------------------------------------------------------
+6. CÁC QUY TẮC CỐNG HIẾN ĐIỂM (CẤM QUÊN)
+--------------------------------------------------------------------------------
+1. Nối URL ở Q2 BẮT BUỘC dùng phép cộng chuỗi dấu "+":
+   baseUrl + "/api/members/search?memberName=" + (memberName ?? "") + "&bookingStatus=" + selectedStatus
+2. Không chèn thẻ con vào trong thẻ <td> có id (ví dụ đề bắt <td id="td_name_1">John</td> thì
+   cấm bọc <td id="td_name_1"><span>John</span></td> -> bọc vào là 0 ĐIỂM ngay lập tức).
+3. Đọc GivenAPIBaseUrl trong Controller Q2 bằng IConfiguration:
+   string baseUrl = _config["GivenAPIBaseUrl"]!;
+================================================================================
