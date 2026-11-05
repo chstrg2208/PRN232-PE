@@ -35,16 +35,25 @@ Tất cả 6 mã đề trong phòng thi đều dùng chung một Database **`PRN
 
 ---
 
-## ⚠️ 3. 3 "Bẫy Tử Thần" Bị 0 Điểm Cần Tránh Tuyệt Đối
+## ⚠️ 3. 5 "Bẫy Tử Thần" Cần Tránh Tuyệt Đối (Trích Từ "Lưu Ý Thi PE")
+
+File chính thức **`Luu y khi lam bai thi PE.pdf`** của bộ môn quy định các lỗi sau sẽ bị **0 điểm trực tiếp**:
 
 1. ❌ **Cấm cài thêm thư viện qua NuGet Package Manager:** Bài thi bị tính gian lận / invalid nếu thêm bất kỳ package nào ngoài các package có sẵn trong khung `GivenSolution`.
-   - Q1 đã có sẵn: EF Core SqlServer + Design, Swagger, OData, JwtBearer.
-   - Q2 chỉ có sẵn: `Newtonsoft.Json`. Vì không có package sinh view nên **View trong Q2 phải tạo tay** (xem hướng dẫn bên dưới).
-2. ❌ **Chuỗi kết nối / URL bắt buộc nằm trong `appsettings.json`:**
-   - Q1: Phải nằm trong `"ConnectionStrings": { "MyCnn": "..." }`.
-   - Q2: Phải nằm trong `"GivenAPIBaseUrl": "http://localhost:5100"`.
-   - Nếu hardcode trong code C# -> **0 điểm câu đó**.
-3. ❌ **Sai `id` thẻ HTML hoặc sai URL trong Q2:** Máy chấm tự động bằng tool (quét Selenium theo đúng `id` và `innerText`), không chấm giao diện đẹp hay xấu. Sai `id` = mất trắng điểm testcase đó.
+2. ❌ **Bẫy HTML - Cấm chèn thẻ con vào bên trong `<td id="...">`:**
+   - Đề yêu cầu: `<td id='td_01_name'>John</td>`.
+   - Sinh viên tự ý bọc thêm thẻ: `<td id='td_01_name'><span>John</span></td>` ➔ **BỊ 0 ĐIỂM NGAY LẬP TỨC** vì tool Selenium không đọc được text theo đúng cây DOM!
+   - Chỉ được để text trần trong `<td>` (trừ khi file `.html` mẫu của trường có sẵn thẻ con).
+3. ❌ **Bắt buộc nối URL bằng phép cộng chuỗi tường minh (`+`):**
+   - Không dùng `Path.Combine`, string interpolation `$"{baseUrl}/..."` hay `UriBuilder`.
+   - Phải dùng: `baseUrl + "/api/..." + param`.
+4. ❌ **Quy chuẩn `appsettings.json`:**
+   - **Q1:** Key kết nối CSDL bắt buộc là `"ConnectionStrings": { "MyCnn": "..." }`. Không tự ý đổi tên key, không tự ý chèn thêm các object JSON thừa như `Kestrel`, `Endpoints`...
+   - **Q2:** Đường dẫn API bắt buộc là `"GivenAPIBaseUrl": "http://localhost:5100"`. Phải đọc qua `IConfiguration` (`_config["GivenAPIBaseUrl"]`), cấm hardcode chuỗi URL trong code C#.
+5. ❌ **Nộp bài theo từng Question & BẮT BUỘC Publish project trước khi nộp:**
+   - Nộp riêng `Q1` và `Q2`.
+   - Phải chạy lệnh `dotnet publish` sinh thư mục mã sinh viên trước khi nộp vào `PEA_Client`.
+   - Xóa thư mục `bin`, `obj` và thư mục `runtimes` trong folder publish để giảm dung lượng file nộp.
 
 ---
 
@@ -104,20 +113,21 @@ Mở **Tools** -> **NuGet Package Manager** -> **Package Manager Console** (ch�
 dotnet ef dbcontext scaffold "Server=(localdb)\MSSQLLocalDB;Database=PRN232_PE_SU26_13;Trusted_Connection=True;TrustServerCertificate=True" Microsoft.EntityFrameworkCore.SqlServer -o Models --no-onconfiguring
 ```
 
-### Lệnh Đóng Gói (Publish) Để Nộp Bài:
-Mở Package Manager Console hoặc Terminal tại thư mục chứa bài làm:
-```powershell
-# Publish Q1
+### Lệnh Đóng Gói (Publish) & Chuẩn Bị Nộp Bài:
+Mở CMD hoặc Terminal tại thư mục từng câu (thư mục chứa file `.csproj` của Q1 hoặc Q2):
+```bash
+# Publish Q1 (Ví dụ tên sinh viên là anhlb, MSSV là he170000 -> anhlbhe170000)
 cd Q1
-dotnet publish -c Release -o ./Q1_<MãSinhViên>
-cd ..
+dotnet publish -c Release -o ./Q1_anhlbhe170000
 
 # Publish Q2
-cd Q2
-dotnet publish -c Release -o ./Q2_<MãSinhViên>
-cd ..
+cd ../Q2
+dotnet publish -c Release -o ./Q2_anhlbhe170000
 ```
-*Lưu ý: Sau khi publish xong, vào thư mục Q1 và Q2 xóa sạch thư mục `bin/` và `obj/` (giữ lại thư mục `Q1_<MãSinhViên>`) trước khi nộp vào phần mềm PEA_Client.*
+> **💡 Các bước giảm dung lượng trước khi nộp vào PEA_Client (Tránh lỗi file quá nặng):**
+> 1. Xóa thư mục `bin/` và `obj/` ở thư mục gốc của project Q1 và Q2.
+> 2. Vào bên trong thư mục vừa publish (`Q1_anhlbhe170000/` và `Q2_anhlbhe170000/`), **xóa thư mục `runtimes/`**.
+> 3. Nộp toàn bộ thư mục gốc của project vào phần mềm `PEA_Client` (nộp theo từng Question, có thể nộp nhiều lần, hệ thống giữ lần nộp cuối cùng).
 
 ---
 

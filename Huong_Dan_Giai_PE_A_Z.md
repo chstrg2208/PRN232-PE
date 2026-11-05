@@ -9,10 +9,12 @@ Toàn bộ bài giải mẫu đã được mình tạo và chạy kiểm chứng
 Điểm PE tổng là **10.0 điểm** (Q1 = 5.0đ, Q2 = 5.0đ). Qua môn thường chỉ cần **≥ 4.0 điểm** (và không bị 0 điểm liệt).
 
 > [!CAUTION]
-> **3 lỗi bị 0 điểm toàn bộ câu (hoặc 0 điểm cả bài) phải tránh tuyệt đối:**
+> **5 lỗi bị 0 điểm toàn bộ câu (hoặc 0 điểm cả bài) trích từ `Luu y khi lam bai thi PE.pdf`:**
 > 1. Tự ý cài thêm thư viện trong **NuGet Package Manager** -> **0 điểm cả bài**.
-> 2. Không để chuỗi kết nối trong `appsettings.json` (`MyCnn` ở Q1, `GivenAPIBaseUrl` ở Q2) -> **0 điểm câu đó**.
-> 3. Sai đường dẫn URL hoặc sai `id="..."` của thẻ HTML trong Q2 -> mất trắng điểm testcase đó (máy chấm tự động tìm theo `id`, không chấm giao diện đẹp/xấu).
+> 2. Không để chuỗi kết nối trong `appsettings.json` (`MyCnn` ở Q1, `GivenAPIBaseUrl` ở Q2) -> **0 điểm câu đó**. Không được thêm các JSON object lạ như Kestrel Endpoints.
+> 3. **Bẫy HTML:** Tuyệt đối không chèn thêm thẻ con (`<span>`, `<div>`) vào trong `<td id="...">` nếu đề/file html mẫu chỉ hiển thị text trần (ví dụ `<td id="td_01_name"><span>John</span></td>` -> **0 điểm ngay lập tức**).
+> 4. Nối URL hoặc đường dẫn file bắt buộc dùng phép cộng chuỗi tường minh bằng dấu `+` (`baseUrl + "/api/..."`).
+> 5. Quên chạy `dotnet publish` theo mã sinh viên trước khi nộp, hoặc nộp file quá nặng do không xóa `bin`, `obj` và `runtimes` trong thư mục publish.
 
 ### Bảng phân bổ điểm chi tiết (Đề 5) & Độ khó
 
