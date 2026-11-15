@@ -1,0 +1,95 @@
+@* [SỬA CHỖ NÀY]: Đổi `TrainerSearchDTO` và `SpecializationDTO` thành tên class DTO mới | [XEM Ở ĐÂU]: Đầu file Q2/Controllers/*Controller.cs *@
+@model List<Q2.Controllers.TrainerSearchDTO>
+@{
+    // [SỬA CHỖ NÀY]: Khớp tên & kiểu ViewBag với Action Index trong Controller
+    var specs = ViewBag.Specs as List<Q2.Controllers.SpecializationDTO> ?? new List<Q2.Controllers.SpecializationDTO>();
+    int selectedSpecId = ViewBag.SelectedSpecId ?? 0;
+    string trainerName = ViewBag.TrainerName ?? "";
+}
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+    <div class="gym-wrap">
+        @* [SỬA CHỖ NÀY]: Sửa tiêu đề & khung HTML bằng cách copy nguyên từ file Index.html đề cho *@
+        <h2 style="margin-top: 0; margin-bottom: 20px;">Trainer Booking Directory</h2>
+
+        @* [SỬA CHỖ NÀY]: Sửa `action="/Trainer"` | [XEM Ở ĐÂU]: Thẻ <form> trong file Index.html đề cho (bỏ phần http://localhost:5190, giữ lại /...) *@
+        <form method="get" action="/Trainer" class="filter-section">
+            <div class="filter-item">
+                <label>Specialization:</label>
+                @* [SỬA CHỖ NÀY]: `name="..."` và `id="..."` | [XEM Ở ĐÂU]: Thẻ <select> trong file Index.html đề cho + bảng "4. Summary of HTML Elements ID" trên đề PDF Q2 *@
+                <select name="specId" id="sl_specializations">
+                    @* [SỬA CHỖ NÀY]: Option đầu tiên `value`, `id` (op_0 / op_all), text | [XEM Ở ĐÂU]: Thẻ <option> đầu tiên trong file Index.html đề cho *@
+                    @if (selectedSpecId == 0)
+                    {
+                        <option value="0" id="op_0" selected>All specializations</option>
+                    }
+                    else
+                    {
+                        <option value="0" id="op_0">All specializations</option>
+                    }
+
+                    @* [SỬA CHỖ NÀY]: Mẫu `id="op_@sp.SpecID"` + `sp.SpecID`, `sp.SpecName` | [XEM Ở ĐÂU]: Các thẻ <option> trong file Index.html đề cho + bảng "4. Summary of HTML Elements ID" trên đề PDF Q2 *@
+                    @foreach (var sp in specs)
+                    {
+                        if (selectedSpecId == sp.SpecID)
+                        {
+                            <option value="@sp.SpecID" id="op_@sp.SpecID" selected>@sp.SpecName</option>
+                        }
+                        else
+                        {
+                            <option value="@sp.SpecID" id="op_@sp.SpecID">@sp.SpecName</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="filter-item">
+                <label>Trainer Name:</label>
+                @* [SỬA CHỖ NÀY]: `name="..."` và `id="..."` | [XEM Ở ĐÂU]: Thẻ <input> trong file Index.html đề cho + bảng "4. Summary of HTML Elements ID" trên đề PDF Q2 *@
+                <input type="text" name="trainerName" id="ip_trainerName" value="@trainerName" placeholder="Enter trainer name...">
+            </div>
+
+            @* [SỬA CHỖ NÀY]: `id="..."` và chữ trên nút | [XEM Ở ĐÂU]: Thẻ <button> trong file Index.html đề cho *@
+            <button type="submit" id="bt_search" class="btn-submit">Search</button>
+        </form>
+
+        <table class="trainer-table">
+            <thead>
+                <tr>
+                    <th style="width: 250px;">Trainer Name</th>
+                    <th style="width: 250px;">Email</th>
+                    <th style="width: 150px;">Experience Years</th>
+                    <th style="width: 250px;">Specializations</th>
+                    <th style="width: 150px;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @* [SỬA CHỖ NÀY]: Mở Index.html đề cho, xóa hết <tr> mẫu chỉ giữ 1 <tr> đầu tiên bọc @foreach bên dưới *@
+                @foreach (var t in Model)
+                {
+                    <tr>
+                        @* [SỬA CHỖ NÀY]: Mẫu `id="td_..._@t.Id"`, tên thuộc tính `@t....` | [XEM Ở ĐÂU]: Thẻ <td> trong <tr> đầu tiên của Index.html đề cho & bảng "4. Summary of HTML Elements ID" trên đề PDF Q2 (CẤM bọc <span> vào <td> text!) *@
+                        <td id="td_name_@t.TrainerID">@t.TrainerName</td>
+                        <td id="td_email_@t.TrainerID">@t.Email</td>
+                        <td id="td_exp_@t.TrainerID">@t.ExperienceYears</td>
+                        <td>
+                            @* [SỬA CHỖ NÀY]: Vòng lặp badge nếu cột có nhiều thẻ <span> + mẫu `id="span_@(sp.SpecName)_@sp.SpecID"` | [XEM Ở ĐÂU]: Ô Specializations trong <tr> đầu tiên của Index.html đề cho & bảng "4. Summary of HTML Elements ID" trên đề PDF Q2 *@
+                            @foreach (var sp in t.Specializations)
+                            {
+                                <span id="span_@(sp.SpecName)_@sp.SpecID" class="spec-badge">@sp.SpecName</span>
+                            }
+                        </td>
+                        <td>
+                            @* [SỬA CHỖ NÀY]: `href`, `id`, text chữ nút | [XEM Ở ĐÂU]: Thẻ <a> trong <tr> đầu tiên của Index.html đề cho *@
+                            <a href="/Trainer/Analyze/@t.TrainerID" id="a_@t.TrainerID" class="btn-action">Analyze Schedule</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

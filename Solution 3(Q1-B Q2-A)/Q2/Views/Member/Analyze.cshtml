@@ -1,0 +1,57 @@
+@* [SỬA CHỖ NÀY]: Đổi `MemberDetailDTO` thành tên class DTO chi tiết mới | [XEM Ở ĐÂU]: Đầu file Q2/Controllers/*Controller.cs *@
+@model Q2.Controllers.MemberDetailDTO
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+    <div class="analyze-wrap">
+        @* [SỬA CHỖ NÀY]: Khung trên: copy từ file Analyze.html đề cho, thay dữ liệu cứng bằng `@Model....` giữ nguyên `id="span_..."` | [XEM Ở ĐÂU]: File Analyze.html đề cho & mục "3.2. ... Page" trên đề PDF Q2 *@
+        <div class="member-card">
+            <h3>Member Profile Analysis</h3>
+            <div class="card-item"><strong>Member ID:</strong> <span id="span_@Model.MemberID">@Model.MemberID</span></div>
+            <div class="card-item"><strong>Full Name:</strong> <span id="span_fullName">@Model.FullName</span></div>
+            <div class="card-item"><strong>Join Date:</strong> <span id="span_joinDate">@Model.JoinDate.ToString("yyyy-MM-dd")</span></div>
+            <div class="card-item"><strong>Current Package:</strong> @Model.PackageName (@Model.PackagePrice.ToString("N0") VND)</div>
+        </div>
+
+        <h4 style="margin-bottom: 15px; border-bottom: 1px solid #cbd5e1; padding-bottom: 10px; width: 750px; color: #334155;">Attended Sessions Log</h4>
+
+        <table class="sessions-table">
+            <thead>
+                <tr>
+                    <th style="width: 250px;">Trainer Name</th>
+                    <th style="width: 200px;">Session Time</th>
+                    <th style="width: 150px;">Duration</th>
+                    <th style="width: 200px;">Financial Value Tier</th>
+                </tr>
+            </thead>
+            <tbody>
+                @* [SỬA CHỖ NÀY]: Đổi `Model.Sessions` | [XEM Ở ĐÂU]: Tên property List trong class DTO chi tiết ở Controller *@
+                @foreach (var s in Model.Sessions)
+                {
+                    @* [SỬA CHỖ NÀY]: Công thức tính | [XEM Ở ĐÂU]: Dòng "Calculate: ..." mục "3.2. ... Page" trên đề PDF Q2 *@
+                    var cost = s.DurationMinutes * 5000;
+                    <tr>
+                        @* [SỬA CHỖ NÀY]: Mẫu `id` từng ô `<td>` + định dạng ngày `"yyyy-MM-dd HH:mm"` + hậu tố chữ (vd: `" mins"`) | [XEM Ở ĐÂU]: File Analyze.html đề cho & bảng "4. Summary of HTML Elements ID" trên đề PDF Q2 *@
+                        <td id="td_trainer_@s.BookingID">@s.TrainerName</td>
+                        <td id="td_time_@s.BookingID">@s.SessionTime.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td id="td_duration_@s.BookingID">@s.DurationMinutes mins</td>
+                        <td id="td_tier_@s.BookingID">
+                            @* [SỬA CHỖ NÀY]: Điều kiện `if` + class/style/text 2 nhãn <span> | [XEM Ở ĐÂU]: Dòng "If ... Display ..." mục "3.2." trên đề PDF Q2 + 2 dòng <tr> mẫu trong Analyze.html đề cho *@
+                            @if (cost >= 400000)
+                            {
+                                <span class="badge-high" style="color: red; font-weight: bold;">High Premium Session</span>
+                            }
+                            else
+                            {
+                                <span class="badge-std" style="color: green;">Standard Session</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

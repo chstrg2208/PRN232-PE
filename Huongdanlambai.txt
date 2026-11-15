@@ -1,0 +1,163 @@
+================================================================================
+              HƯỚNG DẪN LÀM BÀI THI PE PRN232 TỪ A - Z (THEO STEP)
+    (Chỉ cần mở file này + 1 VS GivenSolution + 1 VS Bài Giải Mẫu có sẵn)
+================================================================================
+
+--------------------------------------------------------------------------------
+0. NHẬN DIỆN DẠNG ĐỀ & MỞ VISUAL STUDIO
+--------------------------------------------------------------------------------
+* Bốn bộ bài giải mẫu có sẵn trên máy (đủ 100% cả 4 tổ hợp đề, mở đúng 1 bộ tương ứng):
+  1) Solution 3(Q1-B Q2-A)  [Khớp Đề 3]
+     - Q1-B: Web API MembershipPackages       -> PackagesController.cs
+     - Q2-A: Web MVC Member (/Member)         -> MemberController.cs + Views/Member
+
+  2) Solution 4(Q1-B Q2-B)  [Khớp Đề 2, Đề 4]
+     - Q1-B: Web API MembershipPackages       -> PackagesController.cs
+     - Q2-B: Web MVC Trainer (/Trainer)       -> TrainerController.cs + Views/Trainer
+
+  3) Solution 5(Q1-A Q2-A)  [Khớp Đề 1, Đề 5]
+     - Q1-A: Web API Trainer & Specializations -> GymController.cs
+     - Q2-A: Web MVC Member (/Member)         -> MemberController.cs + Views/Member
+
+  4) Solution 6(Q1-A Q2-B)  [Khớp Đề 6]
+     - Q1-A: Web API Trainer & Specializations -> GymController.cs
+     - Q2-B: Web MVC Trainer (/Trainer)       -> TrainerController.cs + Views/Trainer
+
+* Cách nhận diện nhanh đề thuộc A hay B (cả đề Gym lẫn đề đổi DB mới):
+  -> Xem chi tiết trong file `Cachchonsolution.txt` cùng thư mục.
+  - Nhận diện nhanh DB Gym trên đề PDF:
+    + Câu 1 (Trang 2): "Specializations / filter-trainers" -> Q1-A | "MembershipPackages / filter-members" -> Q1-B.
+    + Câu 2 (Trang 9): "URL : /Member" -> Q2-A | "URL : /Trainer" -> Q2-B.
+
+* Thao tác chuẩn bị:
+  Bước 0.1: Mở SSMS -> Ctrl + O mở file database.sql của đề -> bấm F5 (Execute).
+            Ghi nhớ tên Database ở dòng CREATE DATABASE ... và tên SQL Server đang kết nối
+            (Máy của bạn: Server Name = localhost, uid=sa, pwd=123 | Máy thi: xem ô Server name khi Connect).
+  Bước 0.2: Mở 2 cửa sổ Visual Studio song song:
+            - VS 1: GivenSolution.sln của đề thi phát.
+            - VS 2: Mở đúng 1 trong 4 bộ Solution 3 / 4 / 5 / 6 vừa chọn ở trên.
+
+
+--------------------------------------------------------------------------------
+1. LÀM CÂU 1 (Q1 - WEB API)
+--------------------------------------------------------------------------------
+Bước 1.1: Cấu hình Q1/appsettings.json
+  - Sang VS mẫu copy toàn bộ nội dung Q1/appsettings.json dán đè vào Q1/appsettings.json bài thi.
+  - Chuỗi kết nối chuẩn của bạn trong appsettings.json:
+    "MyCnn": "Server=localhost;Database=PRN232_PE_SU26_13;uid=sa;pwd=123;TrustServerCertificate=True;"
+  - Nếu đề đổi tên Database (hoặc máy thi dùng Server name khác): sửa lại cho khớp bước 0.1 -> Ctrl + S.
+  - (KHÔNG đổi tên key "MyCnn", KHÔNG thêm JSON lạ như Kestrel/Endpoints).
+
+Bước 1.2: Tự động sinh thư mục Models (Scaffold Database)
+  - Trên VS bài thi: Menu Tools -> NuGet Package Manager -> Package Manager Console.
+  - Kiểm tra ô "Default project" ở trên khung console phải đang chọn là "Q1".
+  - Chạy LỆNH 1 (KHUYÊN DÙNG - tự đọc tên DB từ appsettings.json, trường đổi tên DB không cần sửa lệnh):
+    (Nhớ bấm Ctrl + S lưu file appsettings.json ở Bước 1.1 trước khi chạy)
+    dotnet ef dbcontext scaffold "Name=ConnectionStrings:MyCnn" Microsoft.EntityFrameworkCore.SqlServer -o Models --project Q1 --no-onconfiguring --force
+  - Hoặc chạy LỆNH 2 (trực tiếp — nếu trường đổi tên DB thì nhớ sửa tên sau chữ Database= ngay trong lệnh; BẮT BUỘC giữ --no-onconfiguring để không bị hardcode vào file Context gây 0 điểm):
+    dotnet ef dbcontext scaffold "Server=localhost;Database=PRN232_PE_SU26_13;uid=sa;pwd=123;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -o Models --project Q1 --no-onconfiguring --force
+  - (Nếu máy báo chưa có dotnet-ef thì chạy trước: dotnet tool install --global dotnet-ef)
+  - Chú ý: Copy ĐỦ CẢ DÒNG bắt đầu từ chữ "dotnet ef...".
+  - Chờ 2-3 giây sau khi hiện Build succeeded cho đến khi dấu nháy PM> hiện lại.
+  - Nếu bên Solution Explorer chưa thấy hiện thư mục Models -> bấm nút Refresh (biểu tượng 2 mũi tên xoay vòng trên thanh Solution Explorer) -> xem tên file *Context.cs.
+
+Bước 1.3: Cấu hình Q1/Program.cs
+  - Sang VS mẫu copy toàn bộ Q1/Program.cs dán đè vào Q1/Program.cs bài thi.
+  - Sửa tên *Context cho khớp với tên file vừa sinh ra ở Bước 1.2 -> Ctrl + S.
+
+Bước 1.4: Tạo Controller cho Q1
+  - Chuột phải vào project Q1 -> Add -> New Folder -> đặt tên: Controllers
+  - Chuột phải vào Controllers -> Add -> Class... -> đặt tên: GymController.cs (Q1-A) hoặc PackagesController.cs (Q1-B).
+  - Sang VS mẫu copy toàn bộ file Controller tương ứng dán đè vào.
+  - Nếu đề đổi bảng/thuộc tính: sửa theo các dòng ghi chú [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY] trong file vừa dán
+    (đổi tên *Context, tên route [HttpGet/Post/Delete], tên field JSON, và câu báo lỗi 400).
+
+Bước 1.5: Chạy test Q1
+  - Chuột phải vào Q1 -> Set as Startup Project -> bấm F5 test các API trên Swagger.
+  - Xong thì bấm nút Stop (hình vuông đỏ) trên Visual Studio.
+
+
+--------------------------------------------------------------------------------
+2. LÀM CÂU 2 (Q2 - WEB MVC GỌI GIVEN API)
+--------------------------------------------------------------------------------
+Bước 2.1: Bật server givenAPI của đề thi
+  - Vào thư mục đề thi (Given_Material\...\2\givenAPI\publish) -> chạy file givenAPI.exe.
+  - Giữ nguyên cửa sổ đen lắng nghe http://localhost:5100 trong suốt lúc làm & test Q2.
+
+Bước 2.2: Nhận diện tên Controller của Q2
+  - Mở file Index.html trong thư mục đề thi bằng Notepad, nhìn dòng <form method="get" action="http://localhost:5190/...">
+  - Chữ ngay sau 5190/ chính là tên Controller (VD: .../Member -> Member | .../Trainer -> Trainer).
+
+Bước 2.3: Kiểm tra Q2/appsettings.json & copy Q2/Program.cs
+  - Mở Q2/appsettings.json đảm bảo có sẵn key "GivenAPIBaseUrl": "http://localhost:5100".
+  - Sang VS mẫu copy toàn bộ Q2/Program.cs dán đè vào Q2/Program.cs bài thi.
+  - Sửa chữ trong {controller=...} khớp với tên Controller ở Bước 2.2 -> Ctrl + S.
+
+Bước 2.4: Tạo Controller cho Q2
+  - Chuột phải vào project Q2 -> Add -> New Folder -> đặt tên: Controllers
+  - Chuột phải vào Controllers -> Add -> Class... -> đặt tên: [TênController]Controller.cs (VD: MemberController.cs).
+  - Sang VS mẫu copy toàn bộ Controller tương ứng dán đè vào.
+  - Nếu đổi đề: mở givenAPI/Controllers/*Controller.cs của đề copy các class DTO mới sang,
+    sửa route [HttpGet], tên tham số action khớp với name="..." trong Index.html, và đường dẫn API.
+
+Bước 2.5: Tạo Views cho Q2
+  - Chuột phải vào project Q2 -> Add -> New Folder -> đặt tên: Views
+  - Chuột phải vào Views -> Add -> New Folder -> đặt tên trùng tên Controller (VD: Member hoặc Trainer).
+  - Chuột phải vào thư mục vừa tạo -> Add -> New Item... -> đặt tên: Index.cshtml
+    (nếu không thấy Razor View cứ chọn Class rồi đổi đuôi thành .cshtml).
+  - Làm tương tự tạo thêm file: Analyze.cshtml.
+  - Sang VS mẫu copy code của Index.cshtml và Analyze.cshtml dán sang.
+  - Nếu đổi đề: đối chiếu file Index.html và Analyze.html của đề để sửa lại đúng tên id, thuộc tính và điều kiện @if.
+
+Bước 2.6: Chạy test Q2
+  - Chuột phải vào Q2 -> Set as Startup Project -> bấm F5.
+  - Thử nhập tìm kiếm, chọn dropdown, bấm Search và bấm link sang trang Analyze kiểm tra đủ dữ liệu.
+  - Xong thì bấm nút Stop (hình vuông đỏ) trên Visual Studio.
+
+
+--------------------------------------------------------------------------------
+3. PUBLISH & DỌN RÁC NỘP BÀI (TÀI KHOẢN THI: trungtcse193059)
+--------------------------------------------------------------------------------
+* Nhớ TẮT chương trình đang chạy (Stop trên VS) trước khi publish.
+* Mở Terminal / Package Manager Console tại thư mục gốc chứa GivenSolution.sln:
+
+1) Publish Q1:
+   cd Q1
+   dotnet publish -c Release -o ./Q1_trungtcse193059
+   cd ..
+
+2) Publish Q2:
+   cd Q2
+   dotnet publish -c Release -o ./Q2_trungtcse193059
+   cd ..
+
+3) Dọn rác giảm dung lượng tránh lỗi nặng khi nộp PEA_Client:
+   - Vào thư mục Q1 và Q2: XÓA thư mục "bin" và "obj" (GIỮ NGUYÊN Q1_trungtcse193059 và Q2_trungtcse193059).
+   - Vào bên trong Q1/Q1_trungtcse193059 và Q2/Q2_trungtcse193059: XÓA thư mục "runtimes" (nếu có).
+
+4) Nộp bài vào PEA_Client:
+   - Question 1: chọn nộp cả thư mục gốc Q1.
+   - Question 2: chọn nộp cả thư mục gốc Q2.
+
+
+--------------------------------------------------------------------------------
+4. XÓA CACHE ẢO VISUAL STUDIO NẾU BỊ BÁO ĐỎ HÀNG TRĂM LỖI
+--------------------------------------------------------------------------------
+Nếu VS báo đỏ vô lý (CS0234, CS0518, System.Object not found):
+- Tắt Visual Studio.
+- Mở PowerShell tại thư mục chứa file .sln chạy lần lượt 3 lệnh:
+  Get-ChildItem -Force -Recurse -Filter ".vs" | Remove-Item -Force -Recurse
+  Get-ChildItem -Force -Recurse -Include "bin","obj" | Remove-Item -Force -Recurse
+  dotnet build
+- Mở lại Visual Studio.
+
+
+--------------------------------------------------------------------------------
+5. 5 QUY TẮC SỐNG CÒN CHỐNG 0 ĐIỂM (CẤM QUÊN)
+--------------------------------------------------------------------------------
+1. KHÔNG tự ý cài thêm bất kỳ thư viện NuGet nào -> Vi phạm = 0 điểm cả bài.
+2. KHÔNG hardcode Connection String hay URL API trong code C# -> Phải đọc từ appsettings.json.
+3. Ở Q2 bắt buộc nối chuỗi URL bằng dấu cộng "+": baseUrl + "/api/..." + param (cấm dùng $"" hay Path.Combine).
+4. KHÔNG tự ý bọc thêm thẻ con (<span>, <div>) vào bên trong <td id="..."> nếu file html mẫu là text trần.
+5. BẮT BUỘC chạy dotnet publish cho từng câu trước khi nộp và xóa bin, obj, runtimes.
+================================================================================

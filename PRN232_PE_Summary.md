@@ -28,8 +28,9 @@ Cùng một DB **Gym** (`PRN232_PE_SU26_13`): `MembershipPackages`, `Members`, `
 | Đề | Q1 (Web API + EF Core) | Q2 (MVC gọi Given API) |
 |---|---|---|
 | 1, 5 | **A – Trainer** (barem Q13) | **A – Member** (barem Q24) |
-| 2, 4, 6 | **B – Package** (barem Q14) | **B – Trainer** (barem Q23) |
-| 3 | **B – Package** | **A – Member** |
+| 2, 4 | **B – Package** (barem Q14) | **B – Trainer** (barem Q23) |
+| 3 | **B – Package** (barem Q14) | **A – Member** (barem Q24) |
+| 6 | **A – Trainer** (barem Q13) | **B – Trainer** (barem Q23) |
 
 ## 3. Q1 – Web API (5 điểm, 8 testcase, DB reset trước mỗi TC)
 

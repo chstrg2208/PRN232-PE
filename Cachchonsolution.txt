@@ -1,0 +1,109 @@
+================================================================================
+              CÁCH NHÌN ĐỀ CHỌN ĐÚNG SOLUTION MẪU (TRONG 5 GIÂY)
+================================================================================
+
+--------------------------------------------------------------------------------
+1. BẢNG TRA NHANH 4 BỘ SOLUTION CÓ SẴN
+--------------------------------------------------------------------------------
+Chỉ có 4 tổ hợp giữa (Q1-A / Q1-B) và (Q2-A / Q2-B), tương ứng đúng 4 thư mục:
+
+  +------------------+------------------+--------------------------+---------------+
+  | Câu 1 (Q1 - API) | Câu 2 (Q2 - MVC) | MỞ THƯ MỤC SOLUTION NÀO? | Khớp các đề   |
+  +------------------+------------------+--------------------------+---------------+
+  |      Q1-B        |      Q2-A        | Solution 3(Q1-B Q2-A)    | Đề 3          |
+  |      Q1-B        |      Q2-B        | Solution 4(Q1-B Q2-B)    | Đề 2, Đề 4    |
+  |      Q1-A        |      Q2-A        | Solution 5(Q1-A Q2-A)    | Đề 1, Đề 5    |
+  |      Q1-A        |      Q2-B        | Solution 6(Q1-A Q2-B)    | Đề 6          |
+  +------------------+------------------+--------------------------+---------------+
+
+* Ghi nhớ bên trong mỗi dạng:
+  - Q1-A -> GymController.cs       | Q1-B -> PackagesController.cs
+  - Q2-A -> MemberController.cs    | Q2-B -> TrainerController.cs
+
+
+--------------------------------------------------------------------------------
+2. NHẬN DIỆN TRONG 5 GIÂY NẾU VẪN LÀ DATABASE GYM (PRN232_PE_SU26_13)
+--------------------------------------------------------------------------------
+Mở đề PDF lên, kiểm tra riêng Câu 1 (Trang 2) và Câu 2 (Trang 9):
+
+  * Xác định Q1 (nhìn bảng URL ở Trang 2):
+    - Thấy `/api/Specializations` và `/api/filter-trainers`  ==> Q1-A
+    - Thấy `/api/MembershipPackages` và `/api/filter-members` ==> Q1-B
+
+  * Xác định Q2 (nhìn dòng URL ở Trang 9 hoặc mở Index.html):
+    - Thấy `URL : /Member` (lọc theo Booking Status)        ==> Q2-A
+    - Thấy `URL : /Trainer` (lọc theo Specialization)       ==> Q2-B
+
+  ==> Ghép (Q1, Q2) vừa tìm được rồi tra Bảng ở mục 1 để mở đúng 1 Solution!
+
+
+--------------------------------------------------------------------------------
+3. NHẬN DIỆN A HAY B NẾU ĐỔI SANG DATABASE / CHỦ ĐỀ MỚI
+   (VD: Bệnh viện, Khóa học, Khách sạn, Thư viện...)
+--------------------------------------------------------------------------------
+
+A. CÁCH PHÂN BIỆT Q1-A VÀ Q1-B (WEB API + EF CORE)
+--------------------------------------------------------------------------------
+So sánh 3 dấu hiệu trên đề PDF:
+
+  1) Nhìn Sơ đồ Database (Trang 2):
+     - Q1-A (Quan hệ N-N có bảng trung gian):
+       Bảng chính nối qua 1 bảng trung gian có 2 khóa chính ghép
+       (VD cũ: Trainers <-> TrainerSpecs <-> Specializations).
+     - Q1-B (Quan hệ 1-N có khóa ngoại trực tiếp):
+       Bảng chính chứa thẳng khóa ngoại trỏ về bảng danh mục, KHÔNG qua bảng trung gian
+       (VD cũ: Members có cột PackageID trỏ thẳng tới MembershipPackages).
+
+  2) Nhìn API số 2 (`GET /api/filter-...`):
+     - Q1-A:
+       + Response JSON có 1 field là MẢNG CHUỖI (`List<string>`, VD: `"specializationList": [...]`).
+       + Tham số lọc thứ 2 so sánh TRỰC TIẾP trên 1 cột có sẵn của bảng chính
+         (VD: `ExperienceYears >= minExperience`).
+     - Q1-B:
+       + Response JSON chỉ có 1 TÊN ĐƠN (`string`, VD: `"packageName": "..."`), KHÔNG có mảng con.
+       + Có xử lý format cột ngày `DateOnly`/`DateTime` (VD: `"joinDate": "2026-01-10T00:00:00"`).
+       + Tham số lọc thứ 2 phải tính TỔNG `.Sum(...)` mới lọc được
+         (VD: `BookingDetails.Sum(DurationMinutes) >= minDuration`).
+
+  3) Nhìn API số 4 (`DELETE`):
+     - Q1-A: Đề ghi phải xóa cả liên kết ở bảng trung gian N-N ("clear their spec links")
+       -> Code có gọi `.Clear()` trước khi `Remove(...)`.
+     - Q1-B: Chỉ xóa thẳng bảng danh mục 1-N ("Remove a ... from the system")
+       -> Code gọi thẳng `Remove(...)`, KHÔNG có `.Clear()`.
+
+
+B. CÁCH PHÂN BIỆT Q2-A VÀ Q2-B (WEB MVC GỌI GIVEN API)
+--------------------------------------------------------------------------------
+Mở file `Index.html` và `Analyze.html` của đề cho (hoặc xem mục 3 & 4 trên đề PDF Q2):
+
+  1) Nhìn Dropdown `<select>` trong `Index.html`:
+     - Q2-A (Lọc theo CHUỖI - String):
+       + API thứ nhất trả về mảng chữ đơn giản (`List<string>`).
+       + Option mặc định có `id="op_all"` (hoặc value là chữ `"All ..."`).
+       + Option con ghép chữ có thay khoảng trắng thành gạch dưới `_` (VD: `id="op_Da_tap"`).
+     - Q2-B (Lọc theo ID SỐ - Int):
+       + API thứ nhất trả về danh sách object (`List<...DTO>` gồm ID + Name).
+       + Option mặc định có `value="0"` và `id="op_0"`.
+       + Option con gắn thẳng ID số (VD: `value="1" id="op_1"`).
+
+  2) Nhìn các ô `<td>` trong bảng của `Index.html`:
+     - Q2-A: Tất cả các ô dữ liệu `<td>` chỉ là TEXT TRẦN, không chứa nhiều badge `<span>` con.
+     - Q2-B: Có 1 cột trong `<td>` chứa NHIỀU thẻ `<span id="span_{Tên}_{ID}">` (danh sách badge/tag).
+
+  3) Nhìn bảng ở trang chi tiết `Analyze.html`:
+     - Q2-A:
+       + Cột cuối tính tiền / giá trị bằng PHÉP NHÂN (VD: `DurationMinutes * 5000 >= 400000`).
+       + ID của từng ô chỉ ghép 1 ID (`td_duration_{BookingID}`, `td_tier_{BookingID}`).
+     - Q2-B:
+       + Cột cuối so sánh TRỰC TIẾP cột có sẵn, không nhân tiền (VD: `DurationMinutes > 60`).
+       + ID của 2 ô cuối ghép 2 ID (`td_duration_{BookingID}_{MemberID}`, `td_intensity_{BookingID}_{MemberID}`).
+
+
+--------------------------------------------------------------------------------
+4. TÓM TẮT QUY TRÌNH CHỌN NHANH LÚC THI
+--------------------------------------------------------------------------------
+Bước 1: Nhìn Q1 -> Xác định `Q1-A` (N-N, có mảng List<string>, có .Clear()) hay `Q1-B` (1-N, không mảng con, lọc theo .Sum()).
+Bước 2: Nhìn Q2 -> Xác định `Q2-A` (op_all, bảng text trần, nhân tiền) hay `Q2-B` (op_0, có nhiều badge <span>, ghép 2 ID).
+Bước 3: Tra Bảng ở Mục 1 -> Mở đúng 1 trong 4 thư mục Solution 3 / 4 / 5 / 6.
+Bước 4: Làm theo từng bước trong `Huongdanlambai.txt` và sửa các chỗ có ghi chú `// [SỬA CHỖ NÀY]`.
+================================================================================

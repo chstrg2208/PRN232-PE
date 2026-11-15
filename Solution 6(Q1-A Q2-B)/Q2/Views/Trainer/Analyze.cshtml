@@ -1,0 +1,54 @@
+@* [SỬA CHỖ NÀY]: Đổi `TrainerDetailDTO` thành tên class DTO chi tiết mới | [XEM Ở ĐÂU]: Đầu file Q2/Controllers/*Controller.cs *@
+@model Q2.Controllers.TrainerDetailDTO
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+    <div class="analyze-wrap">
+        @* [SỬA CHỖ NÀY]: Khung trên: copy từ file Analyze.html đề cho, thay dữ liệu cứng bằng `@Model....` giữ nguyên `id="span_..."` & chữ đi kèm | [XEM Ở ĐÂU]: File Analyze.html đề cho & mục "3.2. ... Page" trên đề PDF Q2 *@
+        <div class="trainer-card">
+            <h3>Trainer Specifications</h3>
+            <div class="card-item"><strong>Trainer ID:</strong> <span id="span_@Model.TrainerID">@Model.TrainerID</span></div>
+            <div class="card-item"><strong>Trainer Name:</strong> <span id="span_trainerName">@Model.TrainerName</span></div>
+            <div class="card-item"><strong>Experience Years:</strong> <span id="span_experienceYears">@Model.ExperienceYears</span> years</div>
+        </div>
+
+        <h4 style="margin-bottom: 15px; border-bottom: 1px solid #cbd5e1; padding-bottom: 10px; width: 750px; color: #334155;">Scheduled Member Sessions</h4>
+
+        <table class="sessions-table">
+            <thead>
+                <tr>
+                    <th style="width: 250px;">Member Name</th>
+                    <th style="width: 200px;">Session Time</th>
+                    <th style="width: 150px;">Duration</th>
+                    <th style="width: 180px;">Session Intensity Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @* [SỬA CHỖ NÀY]: Đổi `Model.BookingSessions` | [XEM Ở ĐÂU]: Tên property List trong class DTO chi tiết ở Controller *@
+                @foreach (var s in Model.BookingSessions)
+                {
+                    <tr>
+                        @* [SỬA CHỖ NÀY]: Mẫu `id` từng ô `<td>` (chú ý ô nào dùng 1 ID, ô nào ghép 2 ID `@(s.BookingID)_@s.MemberID`) + định dạng ngày + hậu tố `" mins"` | [XEM Ở ĐÂU]: File Analyze.html đề cho & bảng "4. Summary of HTML Elements ID" trên đề PDF Q2 *@
+                        <td id="td_member_@s.MemberID">@s.MemberName</td>
+                        <td id="td_time_@s.BookingID">@s.SessionTime.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td id="td_duration_@(s.BookingID)_@s.MemberID">@s.DurationMinutes mins</td>
+                        <td id="td_intensity_@(s.BookingID)_@s.MemberID">
+                            @* [SỬA CHỖ NÀY]: Điều kiện `if` + class/style/text 2 nhãn <span> | [XEM Ở ĐÂU]: Dòng "If ... Display ..." mục "3.2." trên đề PDF Q2 + 2 dòng <tr> mẫu trong Analyze.html đề cho *@
+                            @if (s.DurationMinutes > 60)
+                            {
+                                <span class="badge-high" style="color: red; font-weight: bold;">High Intensity</span>
+                            }
+                            else
+                            {
+                                <span class="badge-std" style="color: green;">Standard</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

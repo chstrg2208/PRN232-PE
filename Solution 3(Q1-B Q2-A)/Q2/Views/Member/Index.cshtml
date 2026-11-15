@@ -1,0 +1,88 @@
+@* [SỬA CHỖ NÀY]: Đổi `MemberSearchDTO` thành tên class DTO mới | [XEM Ở ĐÂU]: Đầu file Q2/Controllers/*Controller.cs *@
+@model List<Q2.Controllers.MemberSearchDTO>
+@{
+    // [SỬA CHỖ NÀY]: Khớp tên & kiểu ViewBag với Action Index trong Controller
+    var statuses = ViewBag.Statuses as List<string> ?? new List<string>();
+    string selectedStatus = ViewBag.SelectedStatus ?? "All statuses";
+    string memberName = ViewBag.MemberName ?? "";
+}
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+    <div class="gym-container">
+        @* [SỬA CHỖ NÀY]: Sửa tiêu đề & khung HTML bằng cách copy nguyên từ file Index.html đề cho *@
+        <h2 style="margin-top: 0; margin-bottom: 20px;">Gym Member Directory Management</h2>
+
+        @* [SỬA CHỖ NÀY]: Sửa `action="/Member"` | [XEM Ở ĐÂU]: Thẻ <form> trong file Index.html đề cho (bỏ phần http://localhost:5190, giữ lại /...) *@
+        <form method="get" action="/Member" class="filter-section">
+            <div class="filter-item">
+                <label>Member Name:</label>
+                @* [SỬA CHỖ NÀY]: `name="..."` và `id="..."` | [XEM Ở ĐÂU]: Thẻ <input> trong file Index.html đề cho + bảng "4. Summary of HTML Elements ID" trên đề PDF Q2 *@
+                <input type="text" name="memberName" id="ip_memberName" value="@memberName" placeholder="Enter member name...">
+            </div>
+
+            <div class="filter-item">
+                <label>Booking Status:</label>
+                @* [SỬA CHỖ NÀY]: `name="..."` và `id="..."` | [XEM Ở ĐÂU]: Thẻ <select> trong file Index.html đề cho + bảng "4. Summary of HTML Elements ID" trên đề PDF Q2 *@
+                <select name="bookingStatus" id="sl_bookingStatus">
+                    @* [SỬA CHỖ NÀY]: Option đầu tiên `value="..."`, `id="..."`, text | [XEM Ở ĐÂU]: Thẻ <option> đầu tiên trong file Index.html đề cho *@
+                    @if (selectedStatus == "All statuses")
+                    {
+                        <option value="All statuses" id="op_all" selected>All statuses</option>
+                    }
+                    else
+                    {
+                        <option value="All statuses" id="op_all">All statuses</option>
+                    }
+
+                    @* [SỬA CHỖ NÀY]: Quy tắc ghép `id` của <option> | [XEM Ở ĐÂU]: Các thẻ <option> trong file Index.html đề cho hoặc mục "Search Area" trên đề PDF Q2 *@
+                    @foreach (var s in statuses)
+                    {
+                        var opId = "op_" + s.Replace(" ", "_");
+                        if (selectedStatus == s)
+                        {
+                            <option value="@s" id="@opId" selected>@s</option>
+                        }
+                        else
+                        {
+                            <option value="@s" id="@opId">@s</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            @* [SỬA CHỖ NÀY]: `id="..."` và chữ trên nút | [XEM Ở ĐÂU]: Thẻ <button> trong file Index.html đề cho *@
+            <button type="submit" id="bt_search" class="btn-submit">Search</button>
+        </form>
+
+        <table class="member-table">
+            <thead>
+                <tr>
+                    <th style="width: 250px;">Member Name</th>
+                    <th style="width: 200px;">Join Date</th>
+                    <th style="width: 250px;">Assigned Package</th>
+                    <th style="width: 150px;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @* [SỬA CHỖ NÀY]: Mở Index.html đề cho, xóa hết <tr> mẫu chỉ giữ 1 <tr> đầu tiên bọc @foreach bên dưới *@
+                @foreach (var m in Model)
+                {
+                    <tr>
+                        @* [SỬA CHỖ NÀY]: Mẫu `id="td_..._@m.Id"`, tên thuộc tính `@m....`, format ngày | [XEM Ở ĐÂU]: Thẻ <td> trong <tr> đầu tiên của Index.html đề cho & bảng "4. Summary of HTML Elements ID" trên đề PDF Q2 (CẤM bọc <span> vào <td> text!) *@
+                        <td id="td_name_@m.MemberID">@m.FullName</td>
+                        <td id="td_joinDate_@m.MemberID">@m.JoinDate.ToString("yyyy-MM-dd")</td>
+                        <td id="td_package_@m.MemberID">@m.PackageName</td>
+                        <td>
+                            @* [SỬA CHỖ NÀY]: `href`, `id`, text chữ nút | [XEM Ở ĐÂU]: Thẻ <a> trong <tr> đầu tiên của Index.html đề cho *@
+                            <a href="/Member/Analyze/@m.MemberID" id="a_@m.MemberID" class="btn-action">Analyze Sales</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
