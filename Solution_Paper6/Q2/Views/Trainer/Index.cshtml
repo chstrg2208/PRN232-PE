@@ -1,16 +1,13 @@
 @* =========================================================================
-   STEP 1: KHAI BÁO KIỂU DỮ LIỆU NHẬN TỪ CONTROLLER (@model) VÀ ĐỌC VIEWBAG
-   MẸO ĐI THI: Toàn bộ khung HTML bên dưới là COPY 100% từ file `givenHTML/Trainer.html`
-   của đề cho sẵn, sau đó chỉ thay phần dữ liệu cứng bằng vòng lặp `@foreach`!
-   ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
-   - Thay `TrainerSearchDTO` và `SpecializationDTO` bằng tên class DTO của đề mới.
-   - Đọc các biến `ViewBag` đã truyền từ Controller sang.
+   MẸO ĐI THI: COPY 100% file `givenHTML/Index.html` dán vào đây, rồi sửa đúng các chỗ có dấu 🔧 bên dưới!
+   TUYỆT ĐỐI KHÔNG tự thêm/xóa thẻ HTML hay bọc thêm <span> vào các <td> thuần text vì Selenium chấm theo DOM & ID!
    ========================================================================= *@
+@* 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Đổi `TrainerSearchDTO` & `SpecializationDTO` theo tên class DTO mới ở Controller *@
 @model List<Q2.Controllers.TrainerSearchDTO>
 @{
-    var specs = ViewBag.Specs as List<Q2.Controllers.SpecializationDTO> ?? new List<Q2.Controllers.SpecializationDTO>();
-    int selectedSpecId = ViewBag.SelectedSpecId ?? 0;
-    string trainerName = ViewBag.TrainerName ?? "";
+    var specs = ViewBag.Specs as List<Q2.Controllers.SpecializationDTO> ?? new List<Q2.Controllers.SpecializationDTO>(); // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Khớp ViewBag & kiểu DTO dropdown
+    int selectedSpecId = ViewBag.SelectedSpecId ?? 0; // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Giá trị đã chọn (int hay string tùy dropdown)
+    string trainerName = ViewBag.TrainerName ?? "";   // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Từ khóa ô tìm kiếm
 }
 <html>
 <head>
@@ -20,21 +17,13 @@
     <div class="gym-wrap">
         <h2 style="margin-top: 0; margin-bottom: 20px;">Trainer Booking Directory</h2>
 
-        @* =================================================================
-           STEP 2: FORM TÌM KIẾM & LỌC (GIỮ NGUYÊN ID CỦA THẺ SELECT, INPUT, BUTTON!)
-           ⚠️ [CỰC KỲ QUAN TRỌNG KHI CHẤM TỰ ĐỘNG]:
-           Tool chấm bài (Selenium) sẽ tìm theo `id="sl_specializations"`, `id="op_0"`,
-           `id="op_@sp.SpecID"`, `id="ip_trainerName"`, `id="bt_search"`.
-           TUYỆT ĐỐI GIỮ ĐÚNG CÁC ID TRONG FILE givenHTML!
-           ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
-           - Sửa `action="/Trainer"` thành đường dẫn trang chính của đề mới.
-           - Thay phần `<option>` cứng trong givenHTML bằng vòng lặp `@foreach` bên dưới.
-           ================================================================= *@
+        @* 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Sửa `action="/Trainer"` thành route trang chính trong đề PDF *@
         <form method="get" action="/Trainer" class="filter-section">
             <div class="filter-item">
                 <label>Specialization:</label>
+                @* 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: `name="specId"` PHẢI KHỚP tên tham số Action Index; `id="sl_specializations"` giữ nguyên theo givenHTML! *@
                 <select name="specId" id="sl_specializations">
-                    @* Option mặc định value="0" ("All specializations") *@
+                    @* 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Option mặc định: check kỹ `value`, `id` (op_0 / op_all) và chữ trong givenHTML *@
                     @if (selectedSpecId == 0)
                     {
                         <option value="0" id="op_0" selected>All specializations</option>
@@ -44,7 +33,7 @@
                         <option value="0" id="op_0">All specializations</option>
                     }
 
-                    @* Vòng lặp in danh sách chuyên môn từ API *@
+                    @* 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Vòng lặp option từ API: sửa thuộc tính `sp.SpecID`, `sp.SpecName` & mẫu `id="op_@sp.SpecID"` theo givenHTML *@
                     @foreach (var sp in specs)
                     {
                         if (selectedSpecId == sp.SpecID)
@@ -61,22 +50,14 @@
 
             <div class="filter-item">
                 <label>Trainer Name:</label>
-                @* Gắn value="@trainerName" để giữ lại chữ vừa gõ sau khi bấm Search *@
+                @* 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: `name="trainerName"` khớp tham số Action Index; giữ nguyên `id="ip_trainerName"` từ givenHTML *@
                 <input type="text" name="trainerName" id="ip_trainerName" value="@trainerName" placeholder="Enter trainer name...">
             </div>
 
+            @* 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Giữ nguyên `id="bt_search"` từ givenHTML *@
             <button type="submit" id="bt_search" class="btn-submit">Search</button>
         </form>
 
-        @* =================================================================
-           STEP 3: BẢNG HIỂN THỊ DANH SÁCH KẾT QUẢ
-           ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
-           - Mở file `givenHTML` của đề mới, XÓA các thẻ `<tr>` dữ liệu mẫu cứng trong `<tbody>`,
-             chỉ giữ lại 1 thẻ `<tr>` đầu tiên làm mẫu rồi bọc `@foreach (var t in Model)` ra ngoài!
-           - Thay số ID cứng (ví dụ: `td_name_1`) thành ID động `td_name_@t.TrainerID`.
-           - Chú ý cột Specializations có vòng lặp con `@foreach (var sp in t.Specializations)`
-             với `id="span_@(sp.SpecName)_@sp.SpecID"` đúng theo mẫu trong givenHTML!
-           ================================================================= *@
         <table class="trainer-table">
             <thead>
                 <tr>
@@ -88,19 +69,23 @@
                 </tr>
             </thead>
             <tbody>
+                @* 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Mở givenHTML xóa hết <tr> mẫu, chỉ giữ 1 <tr> đầu tiên rồi bọc @foreach (var t in Model) *@
                 @foreach (var t in Model)
                 {
                     <tr>
+                        @* 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Sửa ID động `td_..._@t.TrainerID` & `@t.ThuocTinh` khớp givenHTML; KHÔNG bọc thêm <span> vào <td>! *@
                         <td id="td_name_@t.TrainerID">@t.TrainerName</td>
                         <td id="td_email_@t.TrainerID">@t.Email</td>
                         <td id="td_exp_@t.TrainerID">@t.ExperienceYears</td>
                         <td>
+                            @* 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Nếu có cột chứa nhiều tag/badge, giữ đúng pattern `id="span_@(sp.SpecName)_@sp.SpecID"` trong givenHTML *@
                             @foreach (var sp in t.Specializations)
                             {
                                 <span id="span_@(sp.SpecName)_@sp.SpecID" class="spec-badge">@sp.SpecName</span>
                             }
                         </td>
                         <td>
+                            @* 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Đổi đường dẫn `/Trainer/Analyze/@t.TrainerID` + giữ đúng mẫu `id="a_@t.TrainerID"` *@
                             <a href="/Trainer/Analyze/@t.TrainerID" id="a_@t.TrainerID" class="btn-action">Analyze Schedule</a>
                         </td>
                     </tr>

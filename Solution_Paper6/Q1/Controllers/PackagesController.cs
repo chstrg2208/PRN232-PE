@@ -12,10 +12,12 @@ namespace Q1.Controllers
     // - Xem trong đề câu 1.3 (POST) phần "Request Body" có những thuộc tính nào.
     // - XÓA 2 dòng PackageName, Price bên dưới và THAY BẰNG các thuộc tính của đề mới.
     // =========================================================================
+    // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: DTO hứng dữ liệu JSON khi POST tạo mới
+    // -> Mở đề PDF phần 1.3 (Create) xem Request Body JSON có những trường nào thì khai báo đúng tên + kiểu dữ liệu ở đây
     public class PackageCreateDto
     {
-        public string? PackageName { get; set; }     // <-- [SỬA KHI ĐỔI ĐỀ]: Tên thuộc tính chuỗi trong JSON POST
-        public decimal? Price { get; set; }          // <-- [SỬA KHI ĐỔI ĐỀ]: Tên thuộc tính giá/số trong JSON POST
+        public string? PackageName { get; set; }     // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Đổi tên theo field chữ trong JSON POST (vd: CourseName, DepartmentName...)
+        public decimal? Price { get; set; }          // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Đổi tên/kiểu theo field số/giá trong JSON POST (vd: Fee, ExperienceYears...; bỏ nếu đề không gửi)
     }
 
     // =========================================================================
@@ -26,8 +28,10 @@ namespace Q1.Controllers
     {
         // ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
         // Thay `Prn232PeSu2613Context` ở cả 2 dòng dưới bằng tên class *Context trong thư mục Models/
+        // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Tên class DbContext (xem trong thư mục Models/ hoặc file Program.cs sau khi chạy dotnet ef dbcontext scaffold)
         private readonly Prn232PeSu2613Context _context;
 
+        // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Đổi tên hàm tạo trùng tên class Controller + đúng kiểu DbContext
         public PackagesController(Prn232PeSu2613Context context)
         {
             _context = context;
@@ -39,21 +43,19 @@ namespace Q1.Controllers
         // =====================================================================
         // ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
         // 1. Sửa đường dẫn trong [HttpGet("...")] cho giống hệt đường dẫn câu 1.1 trong đề.
+        // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Route câu 1.1 - copy đúng path trong đề PDF (vd: "api/Specializations", "api/Categories")
         [HttpGet("api/MembershipPackages")]
         public IActionResult GetMembershipPackages()
         {
             // STEP 3.1: Truy vấn bảng danh mục từ _context và dùng .Select() tạo đối tượng trả về
-            // ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
-            // - Thay `_context.MembershipPackages` bằng bảng danh mục của đề
-            // - Sửa tên các thuộc tính bên trong `new { ... }` khớp với JSON mẫu trong đề bài!
-            // - Chỗ `.Count`: lấy danh sách bảng con chấm `.Count` (ở đây là `p.Members.Count`)
+            // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Đổi tên DbSet (_context.TenBangDanhMuc) + tên các key JSON trả về đúng theo JSON mẫu câu 1.1
             var result = _context.MembershipPackages
                 .Select(p => new
                 {
-                    PackageId = p.PackageId,         // <-- [SỬA KHI ĐỔI ĐỀ]: Khóa chính
-                    PackageName = p.PackageName,     // <-- [SỬA KHI ĐỔI ĐỀ]: Tên gói/danh mục
-                    Price = p.Price,                 // <-- [SỬA KHI ĐỔI ĐỀ]: Giá (hoặc thuộc tính khác)
-                    MemberCount = p.Members.Count    // <-- [SỬA KHI ĐỔI ĐỀ]: Đếm số lượng bảng con liên kết
+                    PackageId = p.PackageId,         // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Tên key JSON + cột Khóa chính (vd: SpecId = s.SpecId)
+                    PackageName = p.PackageName,     // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Tên key JSON + cột Tên danh mục (vd: CategoryName = c.CategoryName)
+                    Price = p.Price,                 // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Cột phụ (giá/mô tả...; nếu JSON mẫu không có thì xóa, có thêm cột thì thêm vào)
+                    MemberCount = p.Members.Count    // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Tên key đếm số lượng + Navigation Collection nối sang bảng con (p.TenBangCon.Count)
                 })
                 .ToList();
 
@@ -62,38 +64,34 @@ namespace Q1.Controllers
         }
 
         // =====================================================================
-        // CÂU 1.2 (1.5 ĐIỂM): GET FILTER (LỌC DỮ LIỆU + TÍNH TỔNG + BẮT LỖI 400)
+        // CÂU 1.2 (1.5 ĐIỂM): GET FILTER (LỌC DỮ LIỆU + TÍNH TỔNG + SẮP XẾP + BẮT LỖI 400)
         // Đề hiện tại: GET /api/filter-members?packageId=1&minDuration=50
         // =====================================================================
-        // ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
-        // 1. Sửa đường dẫn trong [HttpGet("...")] đúng theo câu 1.2 của đề.
-        // 2. Sửa tên 2 tham số trên hàm `FilterMembers(int? packageId, int? minDuration)`
-        //    cho TRÙNG KHỚP 100% tên biến sau dấu `?` trên URL của đề bài!
+        // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]:
+        // 1. Sửa đường dẫn trong [HttpGet("...")] đúng theo câu 1.2 trong đề PDF (vd: "api/filter-students").
+        // 2. Sửa tên 2 tham số hàm `(int? packageId, int? minDuration)` KHỚP 100% tên biến query sau dấu `?` trong URL đề bài!
         [HttpGet("api/filter-members")]
         public IActionResult FilterMembers(int? packageId, int? minDuration)
         {
-            // STEP 4.1: Kiểm tra điều kiện số âm -> trả về 400 BadRequest (ăn ngay 0.25 - 0.5 điểm!)
-            // ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
-            // Copy Y HỆT câu thông báo lỗi trong đề bài dán vào trong `BadRequest("...")`
+            // STEP 4.1: Kiểm tra tham số âm -> trả về 400 BadRequest (ăn ngay 0.25 - 0.5 điểm!)
+            // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Đổi tên biến cần check âm (vd: minExperience, minPrice...) và copy Y HỆT chuỗi báo lỗi trong đề PDF!
             if (minDuration.HasValue && minDuration.Value < 0)
             {
                 return BadRequest("minDuration cannot be negative");
             }
 
-            // STEP 4.2: Load toàn bộ bảng chính (Members) kèm các bảng liên quan bằng .Include() và .ThenInclude()
-            // MẸO ĐI THI: Dùng .ToList() kéo hết lên RAM rồi xử lý bằng vòng lặp foreach cực kỳ dễ hiểu và không sợ lỗi SQL!
-            // ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
-            // Mở file class chính trong Models/ (ở đây là Member.cs) xem bên dưới cùng có những bảng nào
-            // thì .Include() hết vào đây!
-            var members = _context.Members
-                .Include(m => m.Package)                     // <-- [SỬA KHI ĐỔI ĐỀ]: Bảng gói tập/danh mục (quan hệ 1-N)
-                .Include(m => m.BookingDetails)              // <-- [SỬA KHI ĐỔI ĐỀ]: Bảng chi tiết buổi tập
-                    .ThenInclude(bd => bd.Booking)           // <-- [SỬA KHI ĐỔI ĐỀ]: Bảng lịch đặt
-                        .ThenInclude(b => b.Trainer)         // <-- [SỬA KHI ĐỔI ĐỀ]: Bảng HLV
+            // STEP 4.2: Load toàn bộ bảng chính (Members) kèm các bảng liên quan bằng .Include()/.ThenInclude() và SẮP XẾP
+            // MẸO ĐI THI: Dùng .ToList() kéo hết lên RAM rồi xử lý bằng vòng lặp foreach cực kỳ dễ sửa và không lo lỗi dịch SQL của EF Core!
+            var members = _context.Members                   // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Đổi bảng chính (vd: _context.Trainers, _context.Orders...)
+                .Include(m => m.Package)                     // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Quan hệ 1-N sang bảng danh mục (xóa/đổi nếu tên khác)
+                .Include(m => m.BookingDetails)              // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Bảng chi tiết giao dịch (mở file Model chính trong Models/ xem tên ICollection)
+                    .ThenInclude(bd => bd.Booking)           // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Bảng cha của chi tiết (vd: Booking, Order, Appointment...)
+                        .ThenInclude(b => b.Trainer)         // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Bảng liên quan cấp 3 cần lấy tên (vd: Trainer, Doctor...)
+                .OrderByDescending(m => m.JoinDate)          // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Đề PDF câu 1.2 yêu cầu sort theo cột nào tăng (.OrderBy) hay giảm (.OrderByDescending) thì đổi ở đây!
                 .ToList();
 
             // STEP 4.3: Lọc theo tham số thứ 1 (packageId) nếu người dùng có truyền lên
-            // ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]: Thay `m.PackageId == packageId.Value` bằng cột khóa ngoại cần lọc
+            // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Nếu là 1-N dùng `m.ForeignKeyId == param.Value`; nếu là N-N dùng `m.Collection.Any(x => x.Id == param.Value)`
             if (packageId.HasValue)
             {
                 members = members.Where(m => m.PackageId == packageId.Value).ToList();
@@ -104,39 +102,40 @@ namespace Q1.Controllers
 
             foreach (var m in members)
             {
-                // Sắp xếp các buổi tập của hội viên này theo thời gian giảm dần (buổi mới nhất đứng đầu)
+                // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Thay `m.BookingDetails` & `bd.Booking?.SessionTime` bằng bảng chi tiết và cột ngày giờ cần tìm bản ghi mới nhất
                 var details = m.BookingDetails
                     .OrderByDescending(bd => bd.Booking?.SessionTime)
                     .ToList();
 
-                // Tính tổng số phút đã tập
+                // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Tính tổng cột đề yêu cầu (vd: Sum DurationMinutes, Amount, Quantity...); nhớ `?? 0` để tránh null
                 int totalMinutes = details.Sum(bd => bd.DurationMinutes ?? 0);
 
                 // Nếu đề truyền vào minDuration mà tổng số phút nhỏ hơn minDuration -> Bỏ qua (continue)
-                // ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]: Thay điều kiện lọc tổng/số lượng nếu đề thay đổi
+                // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Thay tên tham số & tên biến tổng nếu đề lọc theo số buổi / tổng tiền / số năm...
                 if (minDuration.HasValue && totalMinutes < minDuration.Value)
                 {
                     continue;
                 }
 
-                // Lấy tên HLV của buổi tập gần nhất; nếu chưa có buổi tập nào thì trả về "No Bookings"
+                // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Lấy tên đối tượng gần nhất; check kỹ đề PDF xem khi rỗng trả về "No Trainers" hay "No Bookings" hay gì!
                 var lastBooking = details.FirstOrDefault()?.Booking;
-                string lastTrainer = lastBooking?.Trainer?.TrainerName ?? "No Bookings";
+                string lastTrainer = lastBooking?.Trainer?.TrainerName ?? "No Trainers";
 
-                // Định dạng ngày kiểu DateOnly sang chuỗi "yyyy-MM-ddTHH:mm:ss" giống JSON mẫu của đề
+                // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Nếu cột ngày trong Model scaffold là `DateOnly?` thì dùng `.ToDateTime(TimeOnly.MinValue).ToString(...)`;
+                // còn nếu là `DateTime?` thì đổi thành `m.JoinDate.Value.ToString("yyyy-MM-ddTHH:mm:ss")`
                 string joinDateStr = m.JoinDate.HasValue
                     ? m.JoinDate.Value.ToDateTime(TimeOnly.MinValue).ToString("yyyy-MM-ddTHH:mm:ss")
                     : "";
 
-                // Thêm vào danh sách kết quả trả về (tên thuộc tính khớp 100% JSON mẫu của đề)
+                // Thêm vào danh sách kết quả trả về (tên thuộc tính PHẢI KHỚP 100% JSON mẫu trong đề PDF)
                 result.Add(new
                 {
-                    MemberId = m.MemberId,
-                    FullName = m.FullName,
-                    JoinDate = joinDateStr,
-                    PackageName = m.Package?.PackageName ?? "",
-                    TotalMinutesTrained = totalMinutes,
-                    LastTrainerName = lastTrainer
+                    MemberId = m.MemberId,                   // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Key JSON + khóa chính bảng chính
+                    FullName = m.FullName,                   // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Key JSON + cột tên bảng chính
+                    JoinDate = joinDateStr,                  // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Key JSON + chuỗi ngày đã format (hoặc đổi cột ngày khác)
+                    PackageName = m.Package?.PackageName ?? "", // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Key JSON + tên danh mục cha
+                    TotalMinutesTrained = totalMinutes,      // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Key JSON + biến tổng vừa tính
+                    LastTrainerName = lastTrainer            // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Key JSON + biến tên liên kết gần nhất
                 });
             }
 
@@ -147,36 +146,34 @@ namespace Q1.Controllers
         // CÂU 1.3 (1.25 ĐIỂM): POST THÊM MỚI + KIỂM TRA TRÙNG TÊN
         // Đề hiện tại: POST /api/MembershipPackages
         // =====================================================================
-        // ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
-        // 1. Sửa đường dẫn trong [HttpPost("...")] theo đúng đề.
+        // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Sửa đường dẫn trong [HttpPost("...")] đúng theo câu 1.3 của đề PDF
         [HttpPost("api/MembershipPackages")]
         public IActionResult CreatePackage([FromBody] PackageCreateDto dto)
         {
             // STEP 5.1: Chuẩn hóa trường cần kiểm tra trùng (cắt khoảng trắng 2 đầu + đổi chữ thường)
-            // ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
-            // Xem đề bắt kiểm tra trùng cột nào (PackageName, Email, Code...) thì thay `dto.PackageName` và `p.PackageName`
+            // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Đổi `dto.PackageName` thành field cần check trùng (vd: dto.Email, dto.CategoryName, dto.Code...)
             string pkgName = (dto.PackageName ?? "").Trim();
 
+            // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Đổi `_context.MembershipPackages` và `p.PackageName` đúng bảng + cột check trùng
             bool exists = _context.MembershipPackages
                 .Any(p => p.PackageName != null && p.PackageName.ToLower() == pkgName.ToLower());
 
             if (exists)
             {
-                // ⚠️ [NẾU ĐỔI ĐỀ]: Copy đúng câu báo lỗi trùng trong đề dán vào đây!
+                // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Copy Y HỆT câu báo lỗi trùng trong đề PDF dán vào đây!
                 return BadRequest("Membership package name already exists");
             }
 
             // STEP 5.2: Tạo đối tượng Entity mới từ DTO để lưu xuống Database
-            // ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
-            // Thay `new MembershipPackage` bằng class Model cần thêm mới, và gán các thuộc tính từ `dto` sang.
+            // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Đổi `new MembershipPackage` thành tên class Entity trong Models/ và map đủ các cột POST
             var pkg = new MembershipPackage
             {
-                PackageName = dto.PackageName,
-                Price = dto.Price
+                PackageName = dto.PackageName,               // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Map thuộc tính 1 từ dto sang Model
+                Price = dto.Price                            // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Map thuộc tính 2 từ dto sang Model (thêm/bớt tùy DTO)
             };
 
             // STEP 5.3: Lưu vào DB
-            _context.MembershipPackages.Add(pkg);
+            _context.MembershipPackages.Add(pkg);            // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Đổi `_context.MembershipPackages` theo tên bảng
             _context.SaveChanges();
 
             // STEP 5.4: Trả về mã 201 Created kèm đối tượng vừa tạo
@@ -187,14 +184,12 @@ namespace Q1.Controllers
         // CÂU 1.4 (1.25 ĐIỂM): DELETE XÓA BẢN GHI + KIỂM TRA RÀNG BUỘC KHÓA NGOẠI
         // Đề hiện tại: DELETE /api/MembershipPackages/{packageId}
         // =====================================================================
-        // ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
-        // 1. Sửa đường dẫn trong [HttpDelete("...")] và tên tham số `int packageId` khớp với đề.
+        // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Sửa route [HttpDelete("...")] và tên biến `{packageId}` khớp tên tham số hàm `int packageId`
         [HttpDelete("api/MembershipPackages/{packageId}")]
         public IActionResult DeletePackage(int packageId)
         {
             // STEP 6.1: Tìm bản ghi cần xóa, nhớ .Include() bảng con để kiểm tra xem có đang được sử dụng không
-            // ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
-            // Thay `_context.MembershipPackages`, `.Include(p => p.Members)` và `p.PackageId == packageId`
+            // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Đổi `_context.MembershipPackages`, `.Include(p => p.Members)` và điều kiện khóa chính `p.PackageId == packageId`
             var pkg = _context.MembershipPackages
                 .Include(p => p.Members)
                 .FirstOrDefault(p => p.PackageId == packageId);
@@ -205,16 +200,15 @@ namespace Q1.Controllers
                 return NotFound();
             }
 
-            // STEP 6.3: Nếu gói tập đang có hội viên đăng ký (Members.Any()) -> Cấm xóa, trả về 400 BadRequest
-            // ⚠️ [NẾU ĐỔI ĐỀ - SỬA Ở ĐÂY]:
-            // Thay `pkg.Members.Any()` bằng bảng con mà đề cấm xóa khi đang có dữ liệu,
-            // và copy Y HỆT câu báo lỗi trong đề vào `BadRequest("...")`
+            // STEP 6.3: Nếu đang có dữ liệu con liên kết -> Cấm xóa, trả về 400 BadRequest
+            // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Đổi `pkg.Members.Any()` thành bảng con cấm xóa khi còn dữ liệu, và copy Y HỆT câu báo lỗi trong đề PDF!
             if (pkg.Members.Any())
             {
                 return BadRequest("Cannot delete membership package with active registered members");
             }
 
             // STEP 6.4: Xóa bản ghi và lưu thay đổi vào DB
+            // 🔧 [ĐỔI ĐỀ SỬA CHỖ NÀY]: Nếu bảng bị xóa có quan hệ N-N (giống Trainer - Specs), thêm `pkg.BangTrungGian.Clear();` trước khi `.Remove(pkg)`
             _context.MembershipPackages.Remove(pkg);
             _context.SaveChanges();
 
